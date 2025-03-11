@@ -17,8 +17,6 @@ export default function Navbar() {
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <h1 className="text-xl font-bold">SD Tech Pros Portal</h1>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -35,23 +33,24 @@ export default function Navbar() {
                   <Link href="/branding">Branding Settings</Link>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <h1 className="text-xl font-bold">SD Tech Pros Portal</h1>
         </div>
 
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">
             Welcome, {user?.name}
           </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => logoutMutation.mutate()}
-            disabled={logoutMutation.isPending}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
         </div>
       </div>
     </nav>
