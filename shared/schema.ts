@@ -59,6 +59,18 @@ export const settings = pgTable("settings", {
   }>(),
 });
 
+export const brandingSettings = pgTable("branding_settings", {
+  id: serial("id").primaryKey(),
+  companyName: text("company_name").notNull(),
+  logo: text("logo_url"),
+  favicon: text("favicon_url"),
+  primaryColor: text("primary_color").notNull().default("#000000"),
+  theme: text("theme", { enum: ["light", "dark", "system"] }).notNull().default("system"),
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ 
   id: true,
@@ -81,6 +93,12 @@ export const insertInquirySchema = createInsertSchema(inquiries).omit({
   createdAt: true 
 });
 
+// Insert schema for branding settings
+export const insertBrandingSettingsSchema = createInsertSchema(brandingSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -95,3 +113,5 @@ export type Inquiry = typeof inquiries.$inferSelect;
 export type InsertInquiry = z.infer<typeof insertInquirySchema>;
 
 export type Settings = typeof settings.$inferSelect;
+export type BrandingSettings = typeof brandingSettings.$inferSelect;
+export type InsertBrandingSettings = z.infer<typeof insertBrandingSettingsSchema>;

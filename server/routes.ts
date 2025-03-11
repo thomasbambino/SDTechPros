@@ -3,8 +3,9 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { freshbooks } from "./freshbooks";
+import { insertBrandingSettingsSchema } from "@shared/schema";
 
-export async function registerRoutes(app: Express): Server {
+export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // Stats endpoint
@@ -74,6 +75,28 @@ export async function registerRoutes(app: Express): Server {
     } catch (error) {
       res.status(500).send("Failed to sync with Freshbooks");
     }
+  });
+
+  // Branding settings endpoints
+  app.get("/api/branding", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user?.role !== "admin") return res.sendStatus(403);
+
+    const settings = await storage.getBrandingSettings();
+    res.json(settings || {});
+  });
+
+  app.patch("/api/branding", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (req.user?.role !== "admin") return res.sendStatus(403);
+
+    const parsed = insertBrandingSettingsSchema.partial().safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Invalid settings data" });
+    }
+
+    const updated = await storage.updateBrandingSettings(parsed.data);
+    res.json(updated);
   });
 
   const httpServer = createServer(app);

@@ -33,6 +33,20 @@ async function comparePasswords(supplied: string, stored: string) {
   }
 }
 
+export async function createInitialAdmin() {
+  const hashedPassword = await hashPassword("admin123");
+  console.log('Created admin password hash:', hashedPassword);
+  const user = await storage.createUser({
+    email: 'admin@sdtechpros.com',
+    name: 'System Admin',
+    password: hashedPassword,
+    role: 'admin'
+  });
+  console.log('Created initial admin user:', user);
+  return user;
+}
+
+
 export function setupAuth(app: Express) {
   if (!process.env.SESSION_SECRET) {
     throw new Error("SESSION_SECRET environment variable is required");
@@ -164,3 +178,13 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 }
+
+// Add a function to create the initial admin user if it doesn't exist.  This should ideally be called once during application startup.
+async function ensureAdminUserExists() {
+  const adminUser = await storage.getUserByEmail('admin@sdtechpros.com');
+  if (!adminUser) {
+      await createInitialAdmin();
+  }
+}
+
+export {ensureAdminUserExists};
