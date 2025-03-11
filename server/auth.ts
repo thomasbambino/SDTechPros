@@ -22,10 +22,15 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    const [hashed, salt] = stored.split(".");
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error('Error comparing passwords:', error);
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
@@ -63,6 +68,7 @@ export function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
+          console.log('Found user:', { ...user, password: '[REDACTED]' });
           const isValid = await comparePasswords(password, user.password);
           console.log(`Password validation result: ${isValid}`);
 
@@ -80,14 +86,22 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user.id);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
+      console.log('Deserializing user:', id);
       const user = await storage.getUser(id);
+      if (!user) {
+        console.log('User not found during deserialization');
+        return done(null, false);
+      }
+      console.log('Deserialized user:', { ...user, password: '[REDACTED]' });
       done(null, user);
     } catch (error) {
+      console.error('Deserialization error:', error);
       done(error);
     }
   });
@@ -131,6 +145,7 @@ export function setupAuth(app: Express) {
           console.error('Login error:', err);
           return next(err);
         }
+        console.log('User logged in successfully:', { ...user, password: '[REDACTED]' });
         res.json(user);
       });
     })(req, res, next);
@@ -144,6 +159,7 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    console.log('GET /api/user - isAuthenticated:', req.isAuthenticated());
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });

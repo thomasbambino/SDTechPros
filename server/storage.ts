@@ -45,51 +45,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      console.log(`Fetching user by ID: ${id}`);
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      console.log('Found user:', user);
+      return user;
+    } catch (error) {
+      console.error('Error fetching user by ID:', error);
+      throw error;
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    try {
+      console.log(`Fetching user by email: ${email}`);
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      console.log('Found user:', user);
+      return user;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      throw error;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
+    try {
+      console.log('Creating new user:', { ...insertUser, password: '[REDACTED]' });
+      const [user] = await db.insert(users).values(insertUser).returning();
+      console.log('Created user:', { ...user, password: '[REDACTED]' });
+      return user;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
   }
 
   async getStats(): Promise<Stats> {
-    const clients = await db.select().from(users).where(eq(users.role, "client"));
-    return {
-      clientCount: clients.length,
-      activeProjects: 0, // To be implemented with projects table
-      pendingInvoices: 0, // To be implemented with invoices table
-      newInquiries: 0, // To be implemented with inquiries table
-    };
+    try {
+      const clients = await db.select().from(users).where(eq(users.role, "client"));
+      return {
+        clientCount: clients.length,
+        activeProjects: 0,
+        pendingInvoices: 0,
+        newInquiries: 0,
+      };
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      throw error;
+    }
   }
 
   async getClients(): Promise<User[]> {
-    return db.select().from(users).where(eq(users.role, "client"));
+    try {
+      return db.select().from(users).where(eq(users.role, "client"));
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      throw error;
+    }
   }
 
   async getActivities(): Promise<Activity[]> {
-    // To be implemented with activities table
     return [];
   }
 
   async getSettings(): Promise<any> {
-    // To be implemented with settings table
     return {};
   }
 
-  async updateSettings(settings: any): Promise<void> {
-    // To be implemented with settings table
-  }
+  async updateSettings(settings: any): Promise<void> {}
 
-  async syncFreshbooksData(data: any): Promise<void> {
-    // To be implemented with Freshbooks integration
-  }
+  async syncFreshbooksData(data: any): Promise<void> {}
 }
 
 export const storage = new DatabaseStorage();
