@@ -9,16 +9,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu, LogOut, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { useQuery } from "@tanstack/react-query";
+import { BrandingSettings } from "@shared/schema";
 
 export default function Navbar() {
   const { user, logoutMutation } = useAuth();
   const { theme, setTheme } = useTheme();
   const isAdmin = user?.role === "admin";
 
+  const { data: branding } = useQuery<BrandingSettings>({
+    queryKey: ["/api/branding"],
+  });
+
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold">SD Tech Pros Portal</h1>
+        <div className="flex items-center gap-4">
+          {branding?.logo ? (
+            <img
+              src={branding.logo}
+              alt={branding?.companyName || "Company Logo"}
+              className="h-8 w-auto"
+            />
+          ) : (
+            <h1 className="text-xl font-bold">{branding?.companyName || "SD Tech Pros"}</h1>
+          )}
+        </div>
 
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">
@@ -46,7 +62,7 @@ export default function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href="/">Dashboard</Link>
+                <Link href="/dashboard">Dashboard</Link>
               </DropdownMenuItem>
               {isAdmin && (
                 <DropdownMenuItem asChild>
