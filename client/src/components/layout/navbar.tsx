@@ -16,7 +16,12 @@ export default function Navbar() {
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <h1 className="text-xl font-bold">SD Tech Pros Portal</h1>
+
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">
+            Welcome, {user?.name}
+          </span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
@@ -24,7 +29,7 @@ export default function Navbar() {
                 Menu
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href="/">Dashboard</Link>
               </DropdownMenuItem>
@@ -43,14 +48,6 @@ export default function Navbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <h1 className="text-xl font-bold">SD Tech Pros Portal</h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            Welcome, {user?.name}
-          </span>
         </div>
       </div>
     </nav>
