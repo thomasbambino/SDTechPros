@@ -27,6 +27,8 @@ export default function BrandingPage() {
       metaDescription: "",
       logo: "",
       favicon: "",
+      loginTitle: "",
+      loginDescription: ""
     },
   });
 
@@ -205,6 +207,41 @@ export default function BrandingPage() {
                         <Textarea
                           {...field}
                           placeholder="Enter site description"
+                          className="resize-none"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <h3 className="text-lg font-medium pt-4">Login Page Customization</h3>
+
+                <FormField
+                  control={form.control}
+                  name="loginTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Login Page Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Welcome message for login page" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="loginDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Login Page Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Description text for login page"
                           className="resize-none"
                           rows={3}
                         />

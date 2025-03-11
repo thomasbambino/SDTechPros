@@ -10,14 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { BrandingSettings } from "@shared/schema";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
+  const { data: branding } = useQuery<BrandingSettings>({
+    queryKey: ["/api/branding"],
+  });
 
   useEffect(() => {
     if (user) {
-      setLocation("/");
+      setLocation("/dashboard");
     }
   }, [user, setLocation]);
 
@@ -33,9 +38,19 @@ export default function AuthPage() {
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-4xl grid md:grid-cols-2 overflow-hidden">
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            SD Tech Pros Portal
-          </h1>
+          <div className="mb-6">
+            {branding?.logo ? (
+              <img
+                src={branding.logo}
+                alt={branding.companyName}
+                className="h-8 w-auto"
+              />
+            ) : (
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {branding?.companyName || "SD Tech Pros"}
+              </h1>
+            )}
+          </div>
 
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="w-full grid grid-cols-2 mb-4">
@@ -141,15 +156,21 @@ export default function AuthPage() {
         </div>
 
         <div className="hidden md:block bg-gradient-to-br from-primary to-primary/60 p-6 text-primary-foreground">
-          <h2 className="text-2xl font-bold mb-4">Welcome to SD Tech Pros</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {branding?.loginTitle || "Welcome to SD Tech Pros"}
+          </h2>
           <p className="text-sm opacity-90 mb-4">
-            Access your projects, track progress, and manage invoices all in one place.
+            {branding?.loginDescription || "Access your projects, track progress, and manage invoices all in one place."}
           </p>
           <ul className="space-y-2 text-sm opacity-80">
-            <li>✓ Real-time project updates</li>
-            <li>✓ Secure client portal</li>
-            <li>✓ Invoice management</li>
-            <li>✓ Document sharing</li>
+            {(branding?.loginFeatures || [
+              "Real-time project updates",
+              "Secure client portal",
+              "Invoice management",
+              "Document sharing"
+            ]).map((feature, index) => (
+              <li key={index}>✓ {feature}</li>
+            ))}
           </ul>
         </div>
       </Card>

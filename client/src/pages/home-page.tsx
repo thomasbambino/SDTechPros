@@ -10,27 +10,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {branding?.logo ? (
-              <img
-                src={branding.logo}
-                alt={branding?.companyName || "Company Logo"}
-                className="h-8 w-auto"
-              />
-            ) : (
-              <h1 className="text-xl font-bold">{branding?.companyName || "SD Tech Pros"}</h1>
-            )}
-          </div>
-          <nav>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/auth">Login</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl font-bold tracking-tight">

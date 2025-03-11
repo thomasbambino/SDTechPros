@@ -65,9 +65,11 @@ export const brandingSettings = pgTable("branding_settings", {
   logo: text("logo_url"),
   favicon: text("favicon_url"),
   primaryColor: text("primary_color").notNull().default("#000000"),
-  theme: text("theme", { enum: ["light", "dark", "system"] }).notNull().default("system"),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+  loginTitle: text("login_title"),
+  loginDescription: text("login_description"),
+  loginFeatures: json("login_features").$type<string[]>(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
