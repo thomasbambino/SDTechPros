@@ -7,10 +7,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function Navbar() {
   const { user, logoutMutation } = useAuth();
+  const { theme, setTheme } = useTheme();
   const isAdmin = user?.role === "admin";
 
   return (
@@ -22,6 +24,19 @@ export default function Navbar() {
           <span className="text-sm text-muted-foreground">
             Welcome, {user?.name}
           </span>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            {theme === "light" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
