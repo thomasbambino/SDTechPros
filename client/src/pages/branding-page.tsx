@@ -2,13 +2,15 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBrandingSettingsSchema, type BrandingSettings } from "@shared/schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import PageContainer from "@/components/layout/page-container";
+import { Loader2 } from "lucide-react";
 
 export default function BrandingPage() {
   const { toast } = useToast();
@@ -18,7 +20,7 @@ export default function BrandingPage() {
 
   const form = useForm({
     resolver: zodResolver(insertBrandingSettingsSchema.partial()),
-    defaultValues: settings || {
+    values: settings || {
       companyName: "",
       primaryColor: "#000000",
       theme: "system",
@@ -47,16 +49,19 @@ export default function BrandingPage() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <PageContainer title="Branding Settings">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </PageContainer>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <PageContainer title="Branding Settings">
       <Card>
-        <CardHeader>
-          <CardTitle>Branding Settings</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
               <FormField
@@ -117,12 +122,13 @@ export default function BrandingPage() {
               />
 
               <Button type="submit" disabled={mutation.isPending}>
+                {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
