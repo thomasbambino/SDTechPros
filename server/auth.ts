@@ -28,10 +28,6 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-export async function createHashedPassword(password: string) {
-  return hashPassword(password);
-}
-
 export function setupAuth(app: Express) {
   if (!process.env.SESSION_SECRET) {
     throw new Error("SESSION_SECRET environment variable is required");
@@ -59,16 +55,28 @@ export function setupAuth(app: Express) {
       { usernameField: 'email' },
       async (email, password, done) => {
         try {
+          console.log(`Login attempt for email: ${email}`);
           const user = await storage.getUserByEmail(email);
-          if (!user || !(await comparePasswords(password, user.password))) {
+
+          if (!user) {
+            console.log('User not found');
             return done(null, false, { message: "Invalid email or password" });
           }
+
+          const isValid = await comparePasswords(password, user.password);
+          console.log(`Password validation result: ${isValid}`);
+
+          if (!isValid) {
+            return done(null, false, { message: "Invalid email or password" });
+          }
+
           return done(null, user);
         } catch (error) {
+          console.error('Login error:', error);
           return done(error);
         }
       }
-    ),
+    )
   );
 
   passport.serializeUser((user, done) => {
@@ -88,12 +96,13 @@ export function setupAuth(app: Express) {
     try {
       const existingUser = await storage.getUserByEmail(req.body.email);
       if (existingUser) {
-        return res.status(400).send("Email already exists");
+        return res.status(400).json({ message: "Email already exists" });
       }
 
+      const hashedPassword = await hashPassword(req.body.password);
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password),
+        password: hashedPassword,
       });
 
       req.login(user, (err) => {
@@ -107,12 +116,22 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: info?.message || "Authentication failed" });
+      if (err) {
+        console.error('Authentication error:', err);
+        return next(err);
+      }
+
+      if (!user) {
+        console.log('Authentication failed:', info?.message);
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
+      }
 
       req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(200).json(user);
+        if (err) {
+          console.error('Login error:', err);
+          return next(err);
+        }
+        res.json(user);
       });
     })(req, res, next);
   });
