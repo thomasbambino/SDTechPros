@@ -28,7 +28,8 @@ export default function BrandingPage() {
       logo: "",
       favicon: "",
       loginTitle: "",
-      loginDescription: ""
+      loginDescription: "",
+      loginFeatures: []
     },
   });
 
@@ -244,6 +245,27 @@ export default function BrandingPage() {
                           placeholder="Description text for login page"
                           className="resize-none"
                           rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="loginFeatures"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Login Page Features (one per line)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                          onChange={(e) => field.onChange(e.target.value.split('\n'))}
+                          placeholder="Enter features, one per line"
+                          className="resize-none"
+                          rows={4}
                         />
                       </FormControl>
                       <FormMessage />

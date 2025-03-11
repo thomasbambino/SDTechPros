@@ -42,7 +42,7 @@ export default function AuthPage() {
             {branding?.logo ? (
               <img
                 src={branding.logo}
-                alt={branding.companyName}
+                alt={branding?.companyName}
                 className="h-8 w-auto"
               />
             ) : (
