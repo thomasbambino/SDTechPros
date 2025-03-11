@@ -1,17 +1,11 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import session from "express-session";
-import createMemoryStore from "memorystore";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
-const MemoryStore = createMemoryStore(session);
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
+const PostgresSessionStore = connectPg(session);
 
 interface Activity {
   id: number;
@@ -40,115 +34,62 @@ export interface IStorage {
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private activities: Map<number, Activity>;
-  private settings: any;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  currentId: number;
-  currentActivityId: number;
 
   constructor() {
-    this.users = new Map();
-    this.activities = new Map();
-    this.settings = {};
-    this.currentId = 1;
-    this.currentActivityId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
     });
-
-    // Create initial admin user
-    this.createInitialAdmin();
-  }
-
-  private async createInitialAdmin() {
-    const adminUser: User = {
-      id: this.currentId++,
-      username: "admin",
-      password: await hashPassword("admin123"), // You can use this password to login
-      role: "admin",
-      email: "admin@sdtechpros.com",
-      name: "System Admin",
-      createdAt: new Date()
-    };
-    this.users.set(adminUser.id, adminUser);
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const now = new Date();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      role: insertUser.role || "pending",
-      createdAt: now
-    };
-    this.users.set(id, user);
-
-    // Add activity
-    this.activities.set(this.currentActivityId++, {
-      id: this.currentActivityId,
-      type: "user",
-      description: `New user ${user.name} registered`,
-      createdAt: now.toISOString()
-    });
-
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getStats(): Promise<Stats> {
-    const clients = Array.from(this.users.values()).filter(
-      (user) => user.role === "client"
-    );
-
+    const clients = await db.select().from(users).where(eq(users.role, "client"));
     return {
       clientCount: clients.length,
-      activeProjects: 0, // Placeholder until projects are implemented
-      pendingInvoices: 0, // Placeholder until invoices are implemented
-      newInquiries: 0, // Placeholder until inquiries are implemented
+      activeProjects: 0, // To be implemented with projects table
+      pendingInvoices: 0, // To be implemented with invoices table
+      newInquiries: 0, // To be implemented with inquiries table
     };
   }
 
   async getClients(): Promise<User[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.role === "client"
-    );
+    return db.select().from(users).where(eq(users.role, "client"));
   }
 
   async getActivities(): Promise<Activity[]> {
-    return Array.from(this.activities.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // To be implemented with activities table
+    return [];
   }
 
   async getSettings(): Promise<any> {
-    return this.settings;
+    // To be implemented with settings table
+    return {};
   }
 
   async updateSettings(settings: any): Promise<void> {
-    this.settings = { ...this.settings, ...settings };
+    // To be implemented with settings table
   }
 
   async syncFreshbooksData(data: any): Promise<void> {
-    // Placeholder for Freshbooks sync implementation
-    // This would update local data based on Freshbooks data
-    this.activities.set(this.currentActivityId++, {
-      id: this.currentActivityId,
-      type: "sync",
-      description: "Synchronized data with Freshbooks",
-      createdAt: new Date().toISOString()
-    });
+    // To be implemented with Freshbooks integration
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
