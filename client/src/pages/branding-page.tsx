@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBrandingSettingsSchema, type BrandingSettings } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import PageContainer from "@/components/layout/page-container";
 import { Loader2, Upload } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect } from "react";
 
 type FormValues = {
   companyName: string;
@@ -47,34 +48,37 @@ export default function BrandingPage() {
     queryKey: ["/api/branding"],
   });
 
-  const defaultValues: FormValues = {
-    companyName: settings?.companyName || "",
-    logo: settings?.logo || "",
-    favicon: settings?.favicon || "",
-    logoSize: settings?.logoSize || 32,
-    primaryColor: settings?.primaryColor || "#000000",
-    metaTitle: settings?.metaTitle || "",
-    metaDescription: settings?.metaDescription || "",
-    heroTitle: settings?.heroTitle || "",
-    heroDescription: settings?.heroDescription || "",
-    services: settings?.services || [],
-    ctaTitle: settings?.ctaTitle || "",
-    ctaDescription: settings?.ctaDescription || "",
-    ctaButtonText: settings?.ctaButtonText || "",
-    loginTitle: settings?.loginTitle || "",
-    loginDescription: settings?.loginDescription || "",
-    loginFeatures: settings?.loginFeatures || [],
-    loginBackgroundGradient: settings?.loginBackgroundGradient || {
-      from: "#000000",
-      to: "#000000",
-    },
-  };
-
-  const form = useForm<FormValues>({
+  const form: UseFormReturn<FormValues> = useForm<FormValues>({
     resolver: zodResolver(insertBrandingSettingsSchema.partial()),
-    defaultValues,
-    values: settings || defaultValues,
+    defaultValues: {
+      companyName: "",
+      logo: "",
+      favicon: "",
+      logoSize: 32,
+      primaryColor: "#000000",
+      metaTitle: "",
+      metaDescription: "",
+      heroTitle: "",
+      heroDescription: "",
+      services: [],
+      ctaTitle: "",
+      ctaDescription: "",
+      ctaButtonText: "",
+      loginTitle: "",
+      loginDescription: "",
+      loginFeatures: [],
+      loginBackgroundGradient: {
+        from: "#000000",
+        to: "#000000",
+      },
+    },
   });
+
+  useEffect(() => {
+    if (settings) {
+      form.reset(settings);
+    }
+  }, [settings, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: Partial<BrandingSettings>) => {
@@ -316,7 +320,7 @@ export default function BrandingPage() {
                         <FormLabel>Services</FormLabel>
                         <FormControl>
                           <div className="space-y-4">
-                            {field.value.map((service, index) => (
+                            {Array.isArray(field.value) && field.value.map((service, index) => (
                               <div key={index} className="grid gap-4 p-4 border rounded-lg">
                                 <Input
                                   placeholder="Service title"
@@ -372,8 +376,9 @@ export default function BrandingPage() {
                               type="button"
                               variant="outline"
                               onClick={() => {
+                                const currentServices = Array.isArray(field.value) ? field.value : [];
                                 field.onChange([
-                                  ...field.value,
+                                  ...currentServices,
                                   { title: "", description: "", icon: "MonitorCheck" },
                                 ]);
                               }}
