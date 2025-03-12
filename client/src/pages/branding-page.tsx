@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBrandingSettingsSchema, type BrandingSettings } from "@shared/schema";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import PageContainer from "@/components/layout/page-container";
 import { Loader2, Upload } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function BrandingPage() {
   const { toast } = useToast();
@@ -27,9 +29,20 @@ export default function BrandingPage() {
       metaDescription: "",
       logo: "",
       favicon: "",
+      logoSize: 32,
+      heroTitle: "",
+      heroDescription: "",
+      services: [],
+      ctaTitle: "",
+      ctaDescription: "",
+      ctaButtonText: "",
       loginTitle: "",
       loginDescription: "",
-      loginFeatures: []
+      loginFeatures: [],
+      loginBackgroundGradient: {
+        from: "#000000",
+        to: "#000000",
+      },
     },
   });
 
@@ -98,8 +111,11 @@ export default function BrandingPage() {
     <PageContainer title="Branding Settings">
       <div className="grid gap-6">
         <Card>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <CardHeader>
+            <CardTitle>Brand Assets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Logo</h3>
                 <div className="aspect-video bg-muted rounded-lg flex items-center justify-center relative overflow-hidden">
@@ -145,34 +161,278 @@ export default function BrandingPage() {
                   }}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="logoSize"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Logo Size (height in pixels)</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-4">
+                        <Slider
+                          min={16}
+                          max={64}
+                          step={4}
+                          value={[field.value]}
+                          onValueChange={([value]) => field.onChange(value)}
+                        />
+                        <Input
+                          type="number"
+                          {...field}
+                          className="w-20"
+                          min={16}
+                          max={64}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+          <CardHeader>
+            <CardTitle>Homepage Content</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Hero Section</h3>
                 <FormField
                   control={form.control}
-                  name="companyName"
+                  name="heroTitle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Name</FormLabel>
+                      <FormLabel>Hero Title</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder="Enter hero title" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
-                  name="primaryColor"
+                  name="heroDescription"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Color</FormLabel>
+                      <FormLabel>Hero Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Enter hero description"
+                          className="resize-none"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Services Section</h3>
+                <FormField
+                  control={form.control}
+                  name="services"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Services</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          {field.value.map((service, index) => (
+                            <div key={index} className="grid gap-4 p-4 border rounded-lg">
+                              <Input
+                                placeholder="Service title"
+                                value={service.title}
+                                onChange={(e) => {
+                                  const newServices = [...field.value];
+                                  newServices[index].title = e.target.value;
+                                  field.onChange(newServices);
+                                }}
+                              />
+                              <Textarea
+                                placeholder="Service description"
+                                value={service.description}
+                                onChange={(e) => {
+                                  const newServices = [...field.value];
+                                  newServices[index].description = e.target.value;
+                                  field.onChange(newServices);
+                                }}
+                              />
+                              <Select
+                                value={service.icon}
+                                onValueChange={(value) => {
+                                  const newServices = [...field.value];
+                                  newServices[index].icon = value;
+                                  field.onChange(newServices);
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select icon" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="MonitorCheck">IT Consulting</SelectItem>
+                                  <SelectItem value="Network">Network</SelectItem>
+                                  <SelectItem value="Shield">Security</SelectItem>
+                                  <SelectItem value="Cloud">Cloud</SelectItem>
+                                  <SelectItem value="Server">Server</SelectItem>
+                                  <SelectItem value="Phone">Support</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="destructive"
+                                onClick={() => {
+                                  const newServices = field.value.filter((_, i) => i !== index);
+                                  field.onChange(newServices);
+                                }}
+                              >
+                                Remove Service
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              field.onChange([
+                                ...field.value,
+                                { title: "", description: "", icon: "MonitorCheck" },
+                              ]);
+                            }}
+                          >
+                            Add Service
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">CTA Section</h3>
+                <FormField
+                  control={form.control}
+                  name="ctaTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CTA Title</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter CTA title" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ctaDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CTA Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Enter CTA description"
+                          className="resize-none"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ctaButtonText"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CTA Button Text</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter button text" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Login Page Customization</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="loginTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Login Page Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Welcome message for login page" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="loginDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Login Page Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Description text for login page"
+                        className="resize-none"
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="loginFeatures"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Login Page Features (one per line)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={Array.isArray(field.value) ? field.value.join('\n') : ''}
+                        onChange={(e) => field.onChange(e.target.value.split('\n'))}
+                        placeholder="Enter features, one per line"
+                        className="resize-none"
+                        rows={4}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="loginBackgroundGradient.from"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gradient Start Color</FormLabel>
                       <FormControl>
                         <div className="flex gap-4">
                           <Input type="color" {...field} className="w-24 h-10" />
@@ -186,101 +446,29 @@ export default function BrandingPage() {
 
                 <FormField
                   control={form.control}
-                  name="metaTitle"
+                  name="loginBackgroundGradient.to"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site Title</FormLabel>
+                      <FormLabel>Gradient End Color</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter site title" />
+                        <div className="flex gap-4">
+                          <Input type="color" {...field} className="w-24 h-10" />
+                          <Input type="text" {...field} placeholder="#000000" />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="metaDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Site Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Enter site description"
-                          className="resize-none"
-                          rows={3}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <h3 className="text-lg font-medium pt-4">Login Page Customization</h3>
-
-                <FormField
-                  control={form.control}
-                  name="loginTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Login Page Title</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Welcome message for login page" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="loginDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Login Page Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Description text for login page"
-                          className="resize-none"
-                          rows={3}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="loginFeatures"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Login Page Features (one per line)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          value={Array.isArray(field.value) ? field.value.join('\n') : ''}
-                          onChange={(e) => field.onChange(e.target.value.split('\n'))}
-                          placeholder="Enter features, one per line"
-                          className="resize-none"
-                          rows={4}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" disabled={mutation.isPending}>
-                  {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
-                </Button>
-              </form>
-            </Form>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        <Button type="submit" disabled={mutation.isPending} onClick={() => form.handleSubmit((data) => mutation.mutate(data))()}>
+          {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save Changes
+        </Button>
       </div>
     </PageContainer>
   );

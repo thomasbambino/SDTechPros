@@ -64,44 +64,59 @@ export const brandingSettings = pgTable("branding_settings", {
   companyName: text("company_name").notNull(),
   logo: text("logo_url"),
   favicon: text("favicon_url"),
+  logoSize: integer("logo_size").notNull().default(32),
   primaryColor: text("primary_color").notNull().default("#000000"),
   metaTitle: text("meta_title"),
   metaDescription: text("meta_description"),
+
+  heroTitle: text("hero_title"),
+  heroDescription: text("hero_description"),
+  services: json("services").$type<Array<{
+    title: string;
+    description: string;
+    icon: string;
+  }>>(),
+  ctaTitle: text("cta_title"),
+  ctaDescription: text("cta_description"),
+  ctaButtonText: text("cta_button_text"),
+
   loginTitle: text("login_title"),
   loginDescription: text("login_description"),
   loginFeatures: json("login_features").$type<string[]>(),
+  loginBackgroundGradient: json("login_background_gradient").$type<{
+    from: string;
+    to: string;
+  }>(),
+
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({ 
+export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
-  createdAt: true 
+  createdAt: true
 });
 
-export const insertClientSchema = createInsertSchema(clients).omit({ 
+export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
-  createdAt: true 
+  createdAt: true
 });
 
-export const insertProjectSchema = createInsertSchema(projects).omit({ 
+export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
-  createdAt: true 
+  createdAt: true
 });
 
-export const insertInquirySchema = createInsertSchema(inquiries).omit({ 
+export const insertInquirySchema = createInsertSchema(inquiries).omit({
   id: true,
   status: true,
-  createdAt: true 
+  createdAt: true
 });
 
-// Insert schema for branding settings
 export const insertBrandingSettingsSchema = createInsertSchema(brandingSettings).omit({
   id: true,
   updatedAt: true,
 });
 
-// Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
