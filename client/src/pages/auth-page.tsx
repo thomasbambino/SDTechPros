@@ -34,6 +34,12 @@ export default function AuthPage() {
     resolver: zodResolver(insertUserSchema),
   });
 
+  const gradientStyle = branding?.loginBackgroundGradient 
+    ? { 
+        backgroundImage: `linear-gradient(to bottom right, ${branding.loginBackgroundGradient.from}, ${branding.loginBackgroundGradient.to})` 
+      }
+    : { backgroundImage: 'linear-gradient(to bottom right, var(--primary), var(--primary)/60)' };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-4xl grid md:grid-cols-2 overflow-hidden">
@@ -42,7 +48,7 @@ export default function AuthPage() {
             {branding?.logo ? (
               <img
                 src={branding.logo}
-                alt={branding?.companyName}
+                alt={branding?.companyName || "Company Logo"}
                 className="h-8 w-auto"
               />
             ) : (
@@ -155,7 +161,10 @@ export default function AuthPage() {
           </Tabs>
         </div>
 
-        <div className="hidden md:block bg-gradient-to-br from-primary to-primary/60 p-6 text-primary-foreground">
+        <div 
+          className="hidden md:block p-6 text-primary-foreground"
+          style={gradientStyle}
+        >
           <h2 className="text-2xl font-bold mb-4">
             {branding?.loginTitle || "Welcome to SD Tech Pros"}
           </h2>
