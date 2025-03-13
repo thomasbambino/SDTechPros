@@ -18,6 +18,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Default logo SVG as a data URL
+const DEFAULT_LOGO = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-size='20'%3ESD Tech Pros%3C/text%3E%3C/svg%3E`;
+
 export function UnifiedNavBar() {
   const { user, logoutMutation } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -30,7 +33,7 @@ export function UnifiedNavBar() {
         <div className="flex items-center gap-4">
           <Link href="/">
             <img
-              src={branding?.logo || "/placeholder-logo.svg"}
+              src={branding?.logo || DEFAULT_LOGO}
               alt={branding?.companyName || "Company Logo"}
               style={{ height: `${branding?.logoSize || 32}px` }}
               className="w-auto object-contain"
