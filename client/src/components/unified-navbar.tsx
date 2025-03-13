@@ -22,7 +22,7 @@ import {
 export function UnifiedNavBar() {
   const { user, logoutMutation } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { branding, isLoading } = useBranding();
+  const { branding, isLoading, error } = useBranding();
   const isAdmin = user?.role === "admin";
 
   return (
@@ -33,12 +33,18 @@ export function UnifiedNavBar() {
             {isLoading ? (
               <Skeleton className="h-8 w-32" />
             ) : branding?.logo ? (
-              <img
-                src={branding.logo}
-                alt={branding.companyName || "Company Logo"}
-                style={{ height: `${branding.logoSize || 32}px` }}
-                className="w-auto object-contain"
-              />
+              <div className="h-8">
+                <img
+                  src={branding.logo}
+                  alt={branding.companyName || "Company Logo"}
+                  style={{ height: `${branding.logoSize || 32}px` }}
+                  className="w-auto h-full object-contain"
+                  onError={(e) => {
+                    console.error('Error loading logo:', e);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
             ) : (
               <Skeleton className="h-8 w-32" />
             )}

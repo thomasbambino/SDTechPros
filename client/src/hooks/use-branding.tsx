@@ -1,28 +1,43 @@
 import { createContext, useContext, ReactNode, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BrandingSettings } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 type BrandingContextType = {
   branding: BrandingSettings | null;
   isLoading: boolean;
+  error: Error | null;
 };
 
 const BrandingContext = createContext<BrandingContextType | null>(null);
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: branding, isLoading } = useQuery<BrandingSettings>({
+
+  const { data: branding, isLoading, error } = useQuery<BrandingSettings>({
     queryKey: ["/api/branding"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    retry: 2,
+    onError: (error) => {
+      console.error('Branding fetch error:', error);
+      toast({
+        title: "Error loading branding",
+        description: "There was an error loading the branding settings.",
+        variant: "destructive",
+      });
+    }
   });
 
   // Apply branding colors and metadata
   useEffect(() => {
     if (branding) {
+      console.log('Applying branding settings:', branding);
+
       // Set primary color as CSS variable
       if (branding.primaryColor) {
-        document.documentElement.style.setProperty('--branding-primary', branding.primaryColor);
+        document.documentElement.style.setProperty('--primary', branding.primaryColor);
       }
 
       // Set favicon if available
@@ -43,14 +58,24 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 
       // Set login background gradient if available
       if (branding.loginBackgroundGradient) {
-        document.documentElement.style.setProperty('--branding-gradient-from', branding.loginBackgroundGradient.from);
-        document.documentElement.style.setProperty('--branding-gradient-to', branding.loginBackgroundGradient.to);
+        document.documentElement.style.setProperty(
+          '--branding-gradient-from',
+          branding.loginBackgroundGradient.from
+        );
+        document.documentElement.style.setProperty(
+          '--branding-gradient-to',
+          branding.loginBackgroundGradient.to
+        );
       }
     }
   }, [branding]);
 
   return (
-    <BrandingContext.Provider value={{ branding: branding || null, isLoading }}>
+    <BrandingContext.Provider value={{ 
+      branding: branding || null, 
+      isLoading,
+      error: error as Error | null
+    }}>
       {children}
     </BrandingContext.Provider>
   );
