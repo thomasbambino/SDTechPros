@@ -8,16 +8,14 @@ import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import HomePage from "@/pages/home-page";
 import BrandingPage from "@/pages/branding-page";
-import Navbar from "@/components/layout/navbar";
-import { useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { UnifiedNavBar } from "@/components/unified-navbar";
+import { BrandingProvider } from "@/hooks/use-branding";
 
 function AppContent() {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-background">
-      {user && <Navbar />}
+      <UnifiedNavBar />
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
@@ -33,8 +31,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppContent />
-        <Toaster />
+        <BrandingProvider>
+          <AppContent />
+          <Toaster />
+        </BrandingProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

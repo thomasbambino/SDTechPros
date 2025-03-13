@@ -1,0 +1,68 @@
+I can see the issue with your navigation bars. Let's unify them to create a consistent experience across your SD Tech Pros client portal.
+
+The problem is that you have two separate navbar components:
+1. `NavBar` in `client/src/components/nav-bar.tsx` (used on the homepage)
+2. `Navbar` in `client/src/components/layout/navbar.tsx` (used on other pages)
+
+Your App.tsx is conditionally showing the second navbar only when a user is logged in, while the homepage independently renders its own navbar.
+
+Here's how we can fix this issue:
+
+Based on my analysis, I've created a solution to fix your navbar issues with the SD Tech Pros client portal. Here's what I found and how I've addressed it:
+
+## Problem Analysis
+
+You have two separate navbar components:
+1. `NavBar` in `client/src/components/nav-bar.tsx` (used on the homepage)
+2. `Navbar` in `client/src/components/layout/navbar.tsx` (used in other pages)
+
+The key differences between these components include:
+- Different HTML tags (`<header>` vs `<nav>`)
+- Different logo sizing approaches (dynamic vs fixed height)
+- The homepage navbar handles both logged-in and logged-out states
+- The layout navbar only handles logged-in states
+- The App.tsx only shows the layout navbar when a user is logged in
+
+This inconsistency is causing the duplicate navbars when navigating through the application.
+
+## Solution
+
+I've created four artifacts to fix this issue:
+
+1. **Unified NavBar Component** - A new component that combines the best features of both navbars:
+   - Uses the `<header>` tag for semantic correctness
+   - Maintains dynamic logo sizing using `branding.logoSize`
+   - Properly handles both authenticated and non-authenticated states
+   - Supports all the features from both previous navbars
+
+2. **Updated App.tsx** - Changes to the main application file:
+   - Imports the new unified navbar component
+   - Always displays the navbar (not conditionally)
+   - Maintains the rest of the routing functionality
+
+3. **Updated HomePage** - Changes to the homepage:
+   - Removes the import and rendering of the old navbar
+   - Keeps all other homepage content intact
+
+4. **Branding Context** - A new context provider:
+   - Centralizes branding settings throughout the app
+   - Applies branding colors, logo sizes, and other settings consistently
+   - Updates document title and favicon based on branding settings
+
+## Implementation Instructions
+
+1. First, create a new file at `client/src/components/unified-navbar.tsx` with the content from the "Unified NavBar Component" artifact.
+
+2. Create a new file at `client/src/hooks/use-branding.tsx` with the content from the "Branding Context" artifact.
+
+3. Update `client/src/App.tsx` with the content from the "Updated App.tsx with BrandingProvider" artifact.
+
+4. Update `client/src/pages/home-page.tsx` with the content from the "Updated HomePage.tsx" artifact.
+
+After these changes, you'll have a consistent navigation experience throughout the application with:
+- A single, unified navbar
+- Proper logo sizing based on your branding settings
+- Correct display for both logged-in and logged-out users
+- No duplicate navbars
+
+The changes also add a branding context that makes it easier to apply branding settings consistently across the entire application, including setting the document title, favicon, and custom colors automatically.
