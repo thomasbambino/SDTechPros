@@ -4,6 +4,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useBranding } from "@/hooks/use-branding";
 import { Menu, LogOut, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,13 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Default logo SVG as a data URL
-const DEFAULT_LOGO = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-size='20'%3ESD Tech Pros%3C/text%3E%3C/svg%3E`;
-
 export function UnifiedNavBar() {
   const { user, logoutMutation } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { branding } = useBranding();
+  const { branding, isLoading } = useBranding();
   const isAdmin = user?.role === "admin";
 
   return (
@@ -32,12 +30,16 @@ export function UnifiedNavBar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/">
-            <img
-              src={branding?.logo || DEFAULT_LOGO}
-              alt={branding?.companyName || "Company Logo"}
-              style={{ height: `${branding?.logoSize || 32}px` }}
-              className="w-auto object-contain"
-            />
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <img
+                src={branding?.logo}
+                alt={branding?.companyName || "Company Logo"}
+                style={{ height: `${branding?.logoSize || 32}px` }}
+                className="w-auto object-contain"
+              />
+            )}
           </Link>
         </div>
 
