@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BrandingSettings } from "@shared/schema";
 
 type BrandingContextType = {
@@ -10,18 +10,21 @@ type BrandingContextType = {
 const BrandingContext = createContext<BrandingContextType | null>(null);
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const { data: branding, isLoading } = useQuery<BrandingSettings>({
     queryKey: ["/api/branding"],
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
   });
 
-  // Apply branding colors to CSS variables
+  // Apply branding colors and metadata
   useEffect(() => {
     if (branding) {
       // Set primary color as CSS variable
       if (branding.primaryColor) {
         document.documentElement.style.setProperty('--branding-primary', branding.primaryColor);
       }
-      
+
       // Set favicon if available
       if (branding.favicon) {
         const link = document.querySelector('link[rel="icon"]') as HTMLLinkElement || document.createElement('link');
@@ -30,7 +33,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
         link.href = branding.favicon;
         document.head.appendChild(link);
       }
-      
+
       // Set page title
       if (branding.metaTitle) {
         document.title = branding.metaTitle;

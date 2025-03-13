@@ -32,13 +32,15 @@ export function UnifiedNavBar() {
           <Link href="/">
             {isLoading ? (
               <Skeleton className="h-8 w-32" />
-            ) : (
+            ) : branding?.logo ? (
               <img
-                src={branding?.logo}
-                alt={branding?.companyName || "Company Logo"}
-                style={{ height: `${branding?.logoSize || 32}px` }}
+                src={branding.logo}
+                alt={branding.companyName || "Company Logo"}
+                style={{ height: `${branding.logoSize || 32}px` }}
                 className="w-auto object-contain"
               />
+            ) : (
+              <Skeleton className="h-8 w-32" />
             )}
           </Link>
         </div>
