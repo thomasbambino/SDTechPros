@@ -18,8 +18,11 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
   const { data: branding, isLoading, error } = useQuery<BrandingSettings>({
     queryKey: ["/api/branding"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
     retry: 2,
+    onSuccess: (data) => {
+      console.log('Branding data received:', data);
+    },
     onError: (error) => {
       console.error('Branding fetch error:', error);
       toast({
