@@ -1,4 +1,3 @@
-import { NavBar } from "@/components/nav-bar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
@@ -66,7 +65,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar />
       {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">

@@ -29,16 +29,12 @@ export function UnifiedNavBar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/">
-            {branding?.logo ? (
-              <img
-                src={branding.logo}
-                alt={branding?.companyName || "Company Logo"}
-                style={{ height: `${branding?.logoSize || 32}px` }}
-                className="w-auto object-contain"
-              />
-            ) : (
-              <h1 className="text-xl font-bold">{branding?.companyName || "SD Tech Pros"}</h1>
-            )}
+            <img
+              src={branding?.logo || "/placeholder-logo.svg"}
+              alt={branding?.companyName || "Company Logo"}
+              style={{ height: `${branding?.logoSize || 32}px` }}
+              className="w-auto object-contain"
+            />
           </Link>
         </div>
 
